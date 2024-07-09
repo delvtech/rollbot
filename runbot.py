@@ -156,7 +156,10 @@ async def check_rollbar_item_backlog(testnet: bool = False):
         except Exception as e:
             print(f"Error checking Rollbar items: {e}")
         print(f"{preamble}Sleeping for {ROLLBAR_WAIT_SECONDS} seconds")
-        await message.edit(content=f"{'Testnet' if testnet else 'Mainnet'} rollbar checked at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}, next check in {ROLLBAR_WAIT_SECONDS} seconds")
+        try:
+            await message.edit(content=f"{'Testnet' if testnet else 'Mainnet'} rollbar checked at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}, next check in {ROLLBAR_WAIT_SECONDS} seconds")
+        except Exception as exc:
+            print(f"Error editing message: {exc}")
         await asyncio.sleep(ROLLBAR_WAIT_SECONDS)
 
 @bot.command()
