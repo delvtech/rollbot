@@ -136,7 +136,7 @@ class Rollbot(commands.Bot):
             file.write(f"{entry_id}\n")
 
     async def perform_rollbar_check(self, testnet: bool = False) -> None:
-        preamble = f"check_rollbar_item_backlog::perform_single_rollbar_check::{'testnet' if testnet else 'mainnet'}:: "
+        preamble = f"check_rollbar_item_backlog::perform_rollbar_check::{'testnet' if testnet else 'mainnet'}:: "
         exclusion_filter = load_exclusion_filter(testnet)
         reported_ids = bot.rollbar_reported_ids_testnet if testnet else bot.rollbar_reported_ids
         print(f"{preamble}Identifying entries to report")
