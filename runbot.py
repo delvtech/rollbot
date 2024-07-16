@@ -104,15 +104,15 @@ class Rollbot(commands.Bot):
     async def setup_hook(self):
         self.rollbar_check.start()  # type: ignore
 
-    @rollbar_check.before_loop  # type: ignore
-    async def before_rollbar_check(self):
-        await self.wait_until_ready()
-        print("Rollbar check is ready to start.")
-
     @tasks.loop(seconds=ROLLBAR_WAIT_SECONDS)
     async def rollbar_check(self):
         await self.perform_rollbar_check(testnet=False)
         await self.perform_rollbar_check(testnet=True)
+
+    @rollbar_check.before_loop  # type: ignore
+    async def before_rollbar_check(self):
+        await self.wait_until_ready()
+        print("Rollbar check is ready to start.")
 
     async def report_entry(self, entry: Dict[str, Any], testnet: bool) -> None:
         level = entry["data"]["level"].lower()
