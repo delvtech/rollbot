@@ -93,6 +93,13 @@ def load_exclusion_filter(testnet: bool) -> List[str]:
     with open(exclusion_list, "r", encoding="utf-8") as file:
         return file.read().splitlines()
 
+def load_reported_ids(filename):
+    if not os.path.exists(filename):
+        open(filename, "w", encoding="utf-8").close()
+        return []
+    with open(filename, "r", encoding="utf-8") as file:
+        return [int(line.strip()) for line in file]
+
 class Rollbot(commands.Bot):
 
     def __init__(self, *args, **kwargs):
@@ -150,13 +157,6 @@ class Rollbot(commands.Bot):
                 reported_ids.append(entry["id"])
                 self.save_reported_id(entry_id=entry["id"], testnet=testnet)
 
-def load_reported_ids(filename):
-    if not os.path.exists(filename):
-        open(filename, "w", encoding="utf-8").close()
-        return []
-    with open(filename, "r", encoding="utf-8") as file:
-        return [int(line.strip()) for line in file]
-
 # Bot setup
 intents = discord.Intents.default()
 intents.message_content = True
@@ -198,6 +198,4 @@ async def rollbar(context):
         await context.send(f"Failed to rollbar: {str(e)}")
 
 # Run the bot
-config["NETWORK"] = sys.argv[1] if len(sys.argv) > 1 else "testnet"
-print(f"{config['NETWORK']=}")
 bot.run(config["DISCORD_BOT_TOKEN"])
