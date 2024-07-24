@@ -79,6 +79,16 @@ def check_rollbar_entries(page: int | None = None, testnet: bool = False) -> lis
     result = response.json().get("result", {})
     return result.get("instances", [])
 
+def is_valid_message(entry: dict) -> bool:
+    # Check if a specific entry has all of the expected fields
+    if "body" not in entry["data"]:
+        return False
+    if "message" not in entry["data"]["body"]:
+        return False
+    if "body" not in entry["data"]["body"]["message"]:
+        return False
+    return True
+
 def is_excluded(entry: dict, rollbar_exclusion_filter: list[str]) -> bool:
     # Check if a specific entry is in the exclusion filter
     message_body = entry["data"]["body"]["message"]["body"]
@@ -143,7 +153,7 @@ class Rollbot(commands.Bot):
         try:
             for page in range(1, ROLLBAR_PAGES_TO_CHECK + 1):
                 entries = check_rollbar_entries(page=page, testnet=testnet)
-                if new_entries := [ entry for entry in entries if entry["id"] not in reported_ids and not is_excluded(entry, exclusion_filter)]:
+                if new_entries := [ entry for entry in entries if entry["id"] not in reported_ids and is_valid_message(entry) and not is_excluded(entry, exclusion_filter)]:
                     entries_to_report.extend(new_entries)
                 else:
                     break
