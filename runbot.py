@@ -1,7 +1,6 @@
 import io
 import os
 import re
-import sys
 from datetime import datetime
 from typing import Any, Dict, List
 
@@ -141,21 +140,24 @@ class Rollbot(commands.Bot):
         reported_ids = bot.rollbar_reported_ids_testnet if testnet else bot.rollbar_reported_ids
         print(f"{preamble}Identifying entries to report")
         entries_to_report = []
-        for page in range(1, ROLLBAR_PAGES_TO_CHECK + 1):
-            entries = check_rollbar_entries(page=page, testnet=testnet)
-            if new_entries := [ entry for entry in entries if entry["id"] not in reported_ids and not is_excluded(entry, exclusion_filter)]:
-                entries_to_report.extend(new_entries)
+        try:
+            for page in range(1, ROLLBAR_PAGES_TO_CHECK + 1):
+                entries = check_rollbar_entries(page=page, testnet=testnet)
+                if new_entries := [ entry for entry in entries if entry["id"] not in reported_ids and not is_excluded(entry, exclusion_filter)]:
+                    entries_to_report.extend(new_entries)
+                else:
+                    break
+            print(f"{preamble}Found {len(entries_to_report)} items to report")
+            if not entries_to_report:
+                print(f"{preamble}No items to report, BREAKING")
             else:
-                break
-        print(f"{preamble}Found {len(entries_to_report)} items to report")
-        if not entries_to_report:
-            print(f"{preamble}No items to report, BREAKING")
-        else:
-            print(f"{preamble}Sending {len(entries_to_report)} items to report")
-            for entry in entries_to_report[::-1]:  # Chronological order
-                await self.report_entry(entry=entry, testnet=testnet)
-                reported_ids.append(entry["id"])
-                self.save_reported_id(entry_id=entry["id"], testnet=testnet)
+                print(f"{preamble}Sending {len(entries_to_report)} items to report")
+                for entry in entries_to_report[::-1]:  # Chronological order
+                    await self.report_entry(entry=entry, testnet=testnet)
+                    reported_ids.append(entry["id"])
+                    self.save_reported_id(entry_id=entry["id"], testnet=testnet)
+        except Exception as exc:
+            print(f"{preamble}Failed to check rollbar: {exc}")
 
 # Bot setup
 intents = discord.Intents.default()
