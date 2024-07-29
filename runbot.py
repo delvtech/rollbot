@@ -63,8 +63,8 @@ def prepare_rollbar_entry(entry, testnet: bool = False):
     print(f"{preamble}added environment")
     embed.add_field(name="Timestamp", value=format_timestamp(data['timestamp']), inline=True)
     print(f"{preamble}added timestamp")
-    # truncate to 6000 characters to meet the discord Embed limit
-    content = content[:6000]
+    # truncate to 2000 characters to meet the discord Embed limit
+    content = content[:min(2000,len(content))]
     print(f"{preamble}truncated content")
     embed.add_field(name="Content", value=content, inline=False)
     print(f"{preamble}added content, returning embed")
